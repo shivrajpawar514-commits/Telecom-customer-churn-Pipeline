@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurnOps — MLOps Customer Churn Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="theme-space">
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fa-solid fa-arrows-spin"></i></div>
+            <div class="logo-text">
+                <h2>ChurnOps MLOps</h2>
+                <span>Final Year Project</span>
+            </div>
+        </div>
+        
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="nav-item active" data-tab="overview">
+                    <i class="fa-solid fa-chart-line"></i> Executive Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="data-profiler">
+                    <i class="fa-solid fa-chart-pie"></i> Data Profiler
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="single-predict">
+                    <i class="fa-solid fa-user-check"></i> What-If Sandbox
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="batch-predict">
+                    <i class="fa-solid fa-file-csv"></i> Batch Analytics
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="performance">
+                    <i class="fa-solid fa-square-poll-vertical"></i> Performance & Logs
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="monitoring">
+                    <i class="fa-solid fa-eye"></i> Drift Monitoring
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-item" data-tab="architecture">
+                    <i class="fa-solid fa-network-wired"></i> Architecture & DFDs
+                </a>
+            </li>
+        </ul>
+
+        <!-- Theme Selection Widget -->
+        <div class="theme-switcher-container">
+            <h4>Dashboard Theme</h4>
+            <div class="theme-grid">
+                <button class="theme-btn active" data-theme="theme-space" style="background-color: #2563eb;" title="Deep Space"></button>
+                <button class="theme-btn" data-theme="theme-forest" style="background-color: #10b981;" title="Midnight Forest"></button>
+                <button class="theme-btn" data-theme="theme-cyberpunk" style="background-color: #d946ef;" title="Cyberpunk"></button>
+                <button class="theme-btn" data-theme="theme-mono" style="background-color: #6b7280;" title="Monochrome"></button>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>Academic Project &copy; 2026</p>
+            <p style="font-size: 10px; margin-top: 4px; opacity: 0.6;">MLOps Churn Pipeline v1.5.0</p>
+        </div>
+    </nav>
+
+    <!-- Main View Content -->
+    <main class="main-content">
+        
+        <!-- Header Bar -->
+        <header class="top-bar">
+            <div class="page-title">
+                <h1>Telecom Customer Churn Pipeline</h1>
+                <p>An End-to-End MLOps Platform for Churn Prediction, Versioning & Drift Auditing</p>
+            </div>
+            
+            <div class="system-status">
+                <div class="status-badge" id="validation-status-box">
+                    <span class="pulse"></span> Schema Validated
+                </div>
+                <div class="status-badge">
+                    <i class="fa-solid fa-server" style="color: var(--success)"></i> API: Active
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. EXECUTIVE DASHBOARD TAB -->
+        <section id="overview" class="tab-content active">
+            
+            <!-- KPI Statistics Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Test ROC-AUC Score</div>
+                    <div class="kpi-value" id="kpi-auc">0.8459</div>
+                    <div class="kpi-sub up"><i class="fa-solid fa-arrow-up-right"></i> +0.48% vs Baseline</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Model Accuracy</div>
+                    <div class="kpi-value" id="kpi-accuracy">80.55%</div>
+                    <div class="kpi-sub neutral"><i class="fa-solid fa-check-double"></i> Verified validation split</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Precision (Positive Predictive)</div>
+                    <div class="kpi-value" id="kpi-precision">66.56%</div>
+                    <div class="kpi-sub neutral"><i class="fa-solid fa-check"></i> Balanced classification threshold</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">F1 Classification Score</div>
+                    <div class="kpi-value" id="kpi-f1">59.47%</div>
+                    <div class="kpi-sub up"><i class="fa-solid fa-arrow-up-right"></i> Optimized hyperparams</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid modules -->
+            <div class="dashboard-grid">
+                <!-- Left panel: Model Comparison -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-trophy" style="color: #f59e0b; margin-right: 8px;"></i> MLflow Model Registry Sandbox</h2>
+                        <span class="badge badge-success" style="font-weight: 600; padding: 6px 12px;">Active model: <span id="best-model-lbl">XGBoost</span></span>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+                        The model trainer automatically sweeps hyperparameters over several candidate model families. You can promote any candidate model to Production below to hot-swap active weights instantly.
+                    </p>
+
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Candidate Model</th>
+                                    <th>Evaluation ROC-AUC</th>
+                                    <th>Optimized Hyperparameters (GridSearchCV)</th>
+                                    <th>Registry Promotion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="model-comparison-rows">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary);">Loading registered metrics...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right panel: Quick Actions -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-gears" style="color: var(--accent); margin-right: 8px;"></i> MLOps Controls</h2>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+                        Trigger pipeline components directly from this interface to re-ingest data, run validation checks, scale, and train.
+                    </p>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <button class="btn btn-primary" id="btnTriggerTrain" style="width: 100%;">
+                            <i class="fa-solid fa-play"></i> Run Training Pipeline
+                        </button>
+                        
+                        <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+                            <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; color: var(--text-secondary);">Pipeline Architecture Meta</h4>
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Dataset Size:</span>
+                                    <span style="font-weight: 600;">7,043 Customers</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">DVC Configured:</span>
+                                    <span style="font-weight: 600; color: var(--success);"><i class="fa-solid fa-circle-check"></i> Yes (reproducible)</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Docker Registry:</span>
+                                    <span style="font-weight: 600;">AWS ECR Integration</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Deployment:</span>
+                                    <span style="font-weight: 600;">AWS ECS Fargate</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Great Expectations Validation Report Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-clipboard-check" style="color: var(--success); margin-right: 8px;"></i> Great Expectations — Data Quality Assertions</h2>
+                </div>
+                <div class="ge-grid" id="ge-assertions-list">
+                    <!-- Javascript loaded assertions -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 2. DATA PROFILER TAB -->
+        <section id="data-profiler" class="tab-content">
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-magnifying-glass" style="color: var(--accent); margin-right: 8px;"></i> Ingested Dataset Summary Profile (train.csv)</h2>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Statistical attributes computed directly from raw training datasets (80% split).</p>
+                </div>
+
+                <div class="profile-stats-grid" id="profiler-stats-container">
+                    <!-- Javascript generated stats summary cards -->
+                </div>
+            </div>
+
+            <div class="visuals-grid">
+                <!-- Left: Contract Distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="font-size: 16px; font-weight: 700; color: white;">Contract Type Cohort Split</h3>
+                    </div>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="profileContractChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: Internet Service Distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="font-size: 16px; font-weight: 700; color: white;">Internet Service Cohort Split</h3>
+                    </div>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="profileInternetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 3. WHAT-IF SANDBOX TAB -->
+        <section id="single-predict" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent); margin-right: 8px;"></i> Real-Time What-If Sandbox Simulator</h2>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Tweak inputs in real-time. The prediction gauges, multi-model benchmarks, and XAI weights will update dynamically on changes.</p>
+                </div>
+
+                <!-- Presets selection -->
+                <div class="preset-container">
+                    <span style="font-size: 14px; font-weight: 600; align-self: center; margin-right: 8px;">Interactive Demos:</span>
+                    <button class="btn btn-secondary" id="btn-preset-loyal" type="button">
+                        <i class="fa-solid fa-user-shield" style="color: var(--success)"></i> Load Loyal Customer Preset
+                    </button>
+                    <button class="btn btn-secondary" id="btn-preset-churn" type="button">
+                        <i class="fa-solid fa-user-xmark" style="color: var(--danger)"></i> Load High Risk Churn Preset
+                    </button>
+                </div>
+
+                <!-- Form Split Layout -->
+                <div class="sandbox-split-grid">
+                    
+                    <!-- Left: Form inputs -->
+                    <form id="predictionForm">
+                        <div class="form-grid-sandbox">
+                            
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select name="gender" class="form-control sandbox-input">
+                                    <option>Female</option>
+                                    <option>Male</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Senior Citizen</label>
+                                <select name="SeniorCitizen" class="form-control sandbox-input">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Partner</label>
+                                <select name="Partner" class="form-control sandbox-input">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Dependents</label>
+                                <select name="Dependents" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone Service</label>
+                                <select name="PhoneService" class="form-control sandbox-input">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Multiple Lines</label>
+                                <select name="MultipleLines" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No phone service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Internet Service Type</label>
+                                <select name="InternetService" class="form-control sandbox-input">
+                                    <option>DSL</option>
+                                    <option>Fiber optic</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Online Security</label>
+                                <select name="OnlineSecurity" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Online Backup</label>
+                                <select name="OnlineBackup" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Device Protection</label>
+                                <select name="DeviceProtection" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tech Support</label>
+                                <select name="TechSupport" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Streaming TV</label>
+                                <select name="StreamingTV" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Streaming Movies</label>
+                                <select name="StreamingMovies" class="form-control sandbox-input">
+                                    <option>No</option>
+                                    <option>Yes</option>
+                                    <option>No internet service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Contract Type</label>
+                                <select name="Contract" class="form-control sandbox-input">
+                                    <option>Month-to-month</option>
+                                    <option>One year</option>
+                                    <option>Two year</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Paperless Billing</label>
+                                <select name="PaperlessBilling" class="form-control sandbox-input">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Payment Method</label>
+                                <select name="PaymentMethod" class="form-control sandbox-input">
+                                    <option>Electronic check</option>
+                                    <option>Mailed check</option>
+                                    <option>Bank transfer (automatic)</option>
+                                    <option>Credit card (automatic)</option>
+                                </select>
+                            </div>
+
+                            <!-- SLIDER CONTROLS FOR DYNAMIC FEEL -->
+                            <div class="form-group slider-group">
+                                <div class="slider-label-row">
+                                    <label>Tenure (Months)</label>
+                                    <span id="tenure-val">12</span>
+                                </div>
+                                <input type="range" name="tenure" class="form-control sandbox-input-slider" min="0" max="72" value="12">
+                            </div>
+
+                            <div class="form-group slider-group">
+                                <div class="slider-label-row">
+                                    <label>Monthly Charges ($)</label>
+                                    <span id="monthly-val">70.00</span>
+                                </div>
+                                <input type="range" name="MonthlyCharges" class="form-control sandbox-input-slider" min="18" max="120" step="0.5" value="70">
+                            </div>
+
+                            <div class="form-group slider-group">
+                                <div class="slider-label-row">
+                                    <label>Total Charges ($)</label>
+                                    <span id="total-val">840.00</span>
+                                </div>
+                                <input type="range" name="TotalCharges" class="form-control sandbox-input-slider" min="18" max="8600" step="10" value="840">
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- Right: Dynamic Outputs dashboard -->
+                    <div class="sandbox-results-panel">
+                        <!-- Premium prediction output card -->
+                        <div class="result-box-active" id="result">
+                            <div id="result-inner-container" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+                                <div class="sandbox-kpi-row">
+                                    <!-- Circular Gauge -->
+                                    <div style="text-align: center;">
+                                        <div class="gauge-wrapper">
+                                            <svg class="gauge-svg" width="130" height="130" viewBox="0 0 160 160">
+                                                <circle class="gauge-bg" cx="80" cy="80" r="70" />
+                                                <circle class="gauge-fill" id="gaugeFillCircle" cx="80" cy="80" r="70" />
+                                            </svg>
+                                            <div class="gauge-text">
+                                                <div class="gauge-percent" id="res-probability" style="font-size: 20px;">0.0%</div>
+                                                <div class="gauge-label" style="font-size: 8px;">Risk</div>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 10px;">
+                                            <h4 style="font-size: 13px; font-weight: 700; color: white; margin-bottom: 4px;">
+                                                Churn: <span id="res-label" style="color: var(--accent);">No</span>
+                                            </h4>
+                                            <span class="badge badge-success" id="res-badge" style="font-size: 9px; padding: 2px 8px;">LOW RISK</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Advisor Recomendations Panel -->
+                                    <div class="advisor-card" id="advisor-card-block">
+                                        <div class="advisor-title">
+                                            <i class="fa-solid fa-lightbulb" style="color: var(--warning);"></i> AI Interventions
+                                        </div>
+                                        <ul class="advisor-recommendations" id="advisor-recommendations-list">
+                                            <!-- Recommendations populated dynamically -->
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="sandbox-charts-row">
+                                    <!-- XAI feature impact chart -->
+                                    <div class="chart-card-small">
+                                        <h4 class="chart-small-title">XAI Risk Contributors</h4>
+                                        <div style="height: 150px; position: relative;">
+                                            <canvas id="xaiChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <!-- Model Predictions Compare Chart -->
+                                    <div class="chart-card-small">
+                                        <h4 class="chart-small-title">Multi-Model Benchmarks</h4>
+                                        <div style="height: 150px; position: relative;">
+                                            <canvas id="compareChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chatbot Retention Assistant Window -->
+                                <div class="chatbot-wrapper">
+                                    <div class="chatbot-header">
+                                        <div class="chatbot-status-row">
+                                            <div class="pulse" style="background-color: var(--accent); box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4)"></div>
+                                            <h4>AI Retention Assistant Chatbot</h4>
+                                        </div>
+                                        <div class="chatbot-controls">
+                                            <button class="btn-chat-shortcut" id="btn-chat-email">Draft Email</button>
+                                            <button class="btn-chat-shortcut" id="btn-chat-script">Agent Script</button>
+                                        </div>
+                                    </div>
+                                    <div class="chatbot-messages" id="chatMessages">
+                                        <div class="chat-message bot">
+                                            Hello! I am your retention virtual assistant. Adjust the parameters on the left to see prediction risks. Ask me questions or click shortcuts to draft discount emails or agent call scripts tailored to this customer profile.
+                                        </div>
+                                    </div>
+                                    <div class="chatbot-input-row">
+                                        <input type="text" id="chatInput" placeholder="Ask chatbot (e.g. 'How can I retain them?')...">
+                                        <button id="btnSendChat"><i class="fa-solid fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Error fallback container -->
+                            <div id="result-error-container" style="display: none; text-align: center; width: 100%; padding: 20px;">
+                                <h3 style="color: var(--danger); margin-bottom: 8px;">Prediction Failed</h3>
+                                <p id="result-error-message" style="color: var(--text-secondary); font-size: 14px;"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. BATCH INFERENCE TAB -->
+        <section id="batch-predict" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-database" style="color: var(--accent); margin-right: 8px;"></i> Batch Customer Analytics (CSV Upload)</h2>
+                    <p style="font-size: 13px; color: var(--text-secondary);">Upload a CSV dataset containing customer profiles. The system will perform batch preprocessing and score each record.</p>
+                </div>
+
+                <!-- Drag-and-drop file upload zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="upload-text">
+                        <h3>Drag & drop your CSV file here</h3>
+                        <p>or click to browse from local directories</p>
+                        <p style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Must contain standard features (e.g. gender, tenure, MonthlyCharges, Contract, etc.)</p>
+                    </div>
+                    <input type="file" id="csvFileInput" accept=".csv">
+                </div>
+
+                <!-- Loading spinner -->
+                <div id="batch-spinner" style="display: none; text-align: center; padding: 40px 0;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 36px; color: var(--accent);"></i>
+                    <p style="margin-top: 12px; font-weight: 600;">Running batch scoring pipeline...</p>
+                </div>
+
+                <!-- Predictions results and summary graphs -->
+                <div id="batch-results-wrapper" style="display: none;">
+                    
+                    <!-- KPI Row -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card" style="padding: 16px 20px;">
+                            <div class="kpi-title" style="font-size: 11px;">Total Customers</div>
+                            <div class="kpi-value" id="batch-total" style="font-size: 22px;">0</div>
+                        </div>
+                        <div class="kpi-card" style="padding: 16px 20px;">
+                            <div class="kpi-title" style="font-size: 11px; color: var(--danger);">Predicted Churned</div>
+                            <div class="kpi-value" id="batch-churn-count" style="font-size: 22px; color: var(--danger);">0</div>
+                        </div>
+                        <div class="kpi-card" style="padding: 16px 20px;">
+                            <div class="kpi-title" style="font-size: 11px; color: var(--success);">Predicted Retained</div>
+                            <div class="kpi-value" id="batch-retain-count" style="font-size: 22px; color: var(--success);">0</div>
+                        </div>
+                        <div class="kpi-card" style="padding: 16px 20px;">
+                            <div class="kpi-title" style="font-size: 11px;">Cohort Churn Rate</div>
+                            <div class="kpi-value" id="batch-churn-rate" style="font-size: 22px;">0.0%</div>
+                        </div>
+                    </div>
+
+                    <div class="visuals-grid">
+                        <!-- Left: Table of predictions -->
+                        <div class="card" style="margin-bottom: 0; padding: 24px;">
+                            <div class="card-header" style="margin-bottom: 12px;">
+                                <h3 style="font-size: 16px; font-weight: 700;">Cohort Predictions Table</h3>
+                                <button class="btn btn-secondary" id="btnDownloadBatch" style="padding: 8px 16px; font-size: 13px;">
+                                    <i class="fa-solid fa-download"></i> Export Predictions CSV
+                                </button>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer ID</th>
+                                            <th>Prediction</th>
+                                            <th>Risk Probability</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="batch-prediction-rows">
+                                        <!-- Javascript filled -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right: Donut Chart -->
+                        <div class="card" style="margin-bottom: 0; padding: 24px; display: flex; flex-direction: column;">
+                            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Churn Cohort Split</h3>
+                            <div style="flex: 1; min-height: 220px; position: relative;">
+                                <canvas id="batchChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. PERFORMANCE & LOGS TAB -->
+        <section id="performance" class="tab-content">
+            
+            <div class="visuals-grid" style="margin-bottom: 30px;">
+                <!-- Left: Feature Importance Chart -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-chart-bar" style="color: var(--accent); margin-right: 8px;"></i> Feature Importance Analysis</h2>
+                        <span style="font-size: 12px; color: var(--text-secondary);">Calculated relative weights</span>
+                    </div>
+                    <div id="feature-chart-error" style="color: var(--danger); font-size: 13px;"></div>
+                    <div style="height: 380px; position: relative;">
+                        <canvas id="featureChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: Confusion Matrix -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-border-all" style="color: var(--accent); margin-right: 8px;"></i> Confusion Matrix</h2>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.4;">
+                        Evaluating classifier thresholds on held-out test datasets (20% split).
+                    </p>
+
+                    <div class="matrix-grid">
+                        <div class="matrix-cell tn">
+                            <div class="matrix-cell-val" id="cm-tn">934</div>
+                            <div class="matrix-cell-label">True Negatives</div>
+                        </div>
+                        <div class="matrix-cell fp">
+                            <div class="matrix-cell-val" id="cm-fp">101</div>
+                            <div class="matrix-cell-label">False Positives</div>
+                        </div>
+                        <div class="matrix-cell fn">
+                            <div class="matrix-cell-val" id="cm-fn">173</div>
+                            <div class="matrix-cell-label">False Negatives</div>
+                        </div>
+                        <div class="matrix-cell tp">
+                            <div class="matrix-cell-val" id="cm-tp">201</div>
+                            <div class="matrix-cell-label">True Positives</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; font-size: 12px; color: var(--text-secondary); text-align: center;" id="cm-stats-lbl">
+                        Specificity: ~90.2% | Sensitivity (Recall): ~53.7%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal log window -->
+            <div class="card" style="margin-bottom: 0;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-terminal" style="color: var(--sidebar-color); margin-right: 8px;"></i> Live Pipeline Logs (Stdout Stream)</h2>
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: var(--accent); font-weight: 600;">Active Session</span>
+                </div>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                    Below is the stdout feed from the logger, displaying active operations including data ingestion splits, schema validations, encoding operations, and training metrics.
+                </p>
+                <div class="terminal-console" id="terminalLogs">Ready. Waiting for log updates or active pipeline processes...</div>
+            </div>
+
+        </section>
+
+        <!-- 6. DRIFT MONITORING TAB -->
+        <section id="monitoring" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-right: 8px;"></i> Production Data & Target Drift Auditing</h2>
+                    <button class="btn btn-primary" id="btnTriggerDrift">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i> Run Drift Diagnostics
+                    </button>
+                </div>
+                
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
+                    This interface compares baseline training schemas (reference dataset) with live inference data batches (current dataset) using <strong>Evidently AI</strong>. It uses statistical testing (Kolmogorov-Smirnov test, Chi-Square test, etc.) to detect changes in data distributions and target variables, preventing silent accuracy degradation in production.
+                </p>
+
+                <!-- Embedded Report Frame container -->
+                <div class="monitoring-frame-container" id="monitoringFrameContainer">
+                    <iframe class="monitoring-iframe" id="monitoringIframe"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. SYSTEM ARCHITECTURE & DFDs TAB -->
+        <section id="architecture" class="tab-content">
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-graduation-cap" style="color: var(--accent); margin-right: 8px;"></i> Project Abstract</h2>
+                </div>
+                <p style="font-size: 14px; color: var(--text-primary); line-height: 1.8; text-align: justify;">
+                    This system implements an end-to-end Machine Learning Operations (MLops) engineering pipeline designed to predict customer churn in telecommunications companies. Leveraging the IBM Telco Customer Churn dataset, we construct modular components for raw data ingestion, validation, preprocessing, model training, evaluation, registry, and serving. To guarantee reproducible pipelines, we employ <strong>Data Version Control (DVC)</strong>, while <strong>MLflow</strong> manages training parameters, logs metric configurations, and hosts the Model Registry. The trained model is served via a containerized <strong>FastAPI</strong> application, configured with Docker, and provisioned in production on <strong>AWS ECS Fargate</strong> via a fully automated <strong>GitHub Actions CI/CD</strong> workflow. System durability and reliability are audited using <strong>Evidently AI</strong> drift analysis reports, closing the loop on continuous deployment, auditing, and retraining.
+                </p>
+            </div>
+
+            <div class="architecture-container">
+                <!-- 1. System Block Diagram -->
+                <div class="card diagram-card" style="margin-bottom: 0;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 24px; text-align: left;"><i class="fa-solid fa-cubes"></i> End-to-End System Block Diagram</h3>
+                    
+                    <svg viewBox="0 0 850 180" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#3b82f6" />
+                                <stop offset="100%" stop-color="#2563eb" />
+                            </linearGradient>
+                            <linearGradient id="slateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#475569" />
+                                <stop offset="100%" stop-color="#1e293b" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Ingestion -->
+                        <rect x="10" y="40" width="100" height="80" rx="8" fill="url(#slateGrad)" />
+                        <text x="60" y="80" fill="white" font-weight="bold" font-size="12" text-anchor="middle">Data Source</text>
+                        <text x="60" y="100" fill="#94a3b8" font-size="10" text-anchor="middle">(IBM CSV)</text>
+                        
+                        <!-- Arrow 1 -->
+                        <line x1="110" y1="80" x2="140" y2="80" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+                        
+                        <!-- Modular Pipeline -->
+                        <rect x="140" y="20" width="220" height="120" rx="10" fill="url(#blueGrad)" />
+                        <text x="250" y="55" fill="white" font-weight="bold" font-size="13" text-anchor="middle">Modular ML Pipeline</text>
+                        <text x="250" y="80" fill="#bfdbfe" font-size="10" text-anchor="middle">1. Ingest → 2. Validate → 3. Preprocess</text>
+                        <text x="250" y="100" fill="#bfdbfe" font-size="10" text-anchor="middle">4. Train → 5. Register → 6. Audit</text>
+                        <text x="250" y="120" fill="white" font-weight="bold" font-size="9" text-anchor="middle">[DVC Orchestrated]</text>
+                        
+                        <!-- Arrow 2 -->
+                        <line x1="360" y1="80" x2="390" y2="80" stroke="#94a3b8" stroke-width="2" />
+                        
+                        <!-- MLflow Tracking -->
+                        <rect x="390" y="40" width="100" height="80" rx="8" fill="url(#slateGrad)" />
+                        <text x="440" y="80" fill="white" font-weight="bold" font-size="12" text-anchor="middle">MLflow Registry</text>
+                        <text x="440" y="100" fill="#94a3b8" font-size="10" text-anchor="middle">Runs & Artifacts</text>
+                        
+                        <!-- Arrow 3 -->
+                        <line x1="490" y1="80" x2="520" y2="80" stroke="#94a3b8" stroke-width="2" />
+                        
+                        <!-- Docker FastAPI -->
+                        <rect x="520" y="40" width="130" height="80" rx="8" fill="url(#blueGrad)" />
+                        <text x="585" y="80" fill="white" font-weight="bold" font-size="12" text-anchor="middle">FastAPI Application</text>
+                        <text x="585" y="100" fill="#bfdbfe" font-size="10" text-anchor="middle">Docker Containerized</text>
+                        
+                        <!-- Arrow 4 -->
+                        <line x1="650" y1="80" x2="680" y2="80" stroke="#94a3b8" stroke-width="2" />
+                        
+                        <!-- AWS Deployment -->
+                        <rect x="680" y="30" width="150" height="100" rx="10" fill="url(#slateGrad)" />
+                        <text x="755" y="65" fill="white" font-weight="bold" font-size="13" text-anchor="middle">AWS Infrastructure</text>
+                        <text x="755" y="90" fill="#94a3b8" font-size="10" text-anchor="middle">ECS Fargate Cluster</text>
+                        <text x="755" y="110" fill="#94a3b8" font-size="9" text-anchor="middle">ALB + CI/CD Deploy</text>
+                        
+                        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+                        </marker>
+                    </svg>
+                </div>
+
+                <!-- 2. Data Flow Diagram Level 1 -->
+                <div class="card diagram-card" style="margin-bottom: 0;">
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 24px; text-align: left;"><i class="fa-solid fa-diagram-project"></i> Data Flow Diagram (DFD Level 1)</h3>
+                    
+                    <svg viewBox="0 0 850 250" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Entities -->
+                        <rect x="10" y="100" width="100" height="50" rx="4" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+                        <text x="60" y="130" fill="white" font-size="11" font-weight="bold" text-anchor="middle">System User</text>
+                        
+                        <rect x="740" y="100" width="100" height="50" rx="4" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+                        <text x="790" y="130" fill="white" font-size="11" font-weight="bold" text-anchor="middle">Database / S3</text>
+                        
+                        <!-- Process 1.0 -->
+                        <circle cx="210" cy="125" r="35" fill="#2563eb" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="210" y="122" fill="white" font-size="10" font-weight="bold" text-anchor="middle">1.0 Ingest</text>
+                        <text x="210" y="134" fill="#bfdbfe" font-size="9" text-anchor="middle">& Validate</text>
+                        
+                        <!-- Process 2.0 -->
+                        <circle cx="370" cy="125" r="35" fill="#2563eb" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="370" y="122" fill="white" font-size="10" font-weight="bold" text-anchor="middle">2.0 Preprocess</text>
+                        <text x="370" y="134" fill="#bfdbfe" font-size="9" text-anchor="middle">& Scale</text>
+                        
+                        <!-- Process 3.0 -->
+                        <circle cx="530" cy="125" r="35" fill="#2563eb" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="530" y="122" fill="white" font-size="10" font-weight="bold" text-anchor="middle">3.0 Model</text>
+                        <text x="530" y="134" fill="#bfdbfe" font-size="9" text-anchor="middle">Training</text>
+                        
+                        <!-- Process 4.0 (Inference) -->
+                        <circle cx="370" cy="25" r="22" fill="#0284c7" stroke="#0ea5e9" stroke-width="1.5"/>
+                        <text x="370" y="28" fill="white" font-size="8" font-weight="bold" text-anchor="middle">4.0 Predict</text>
+
+                        <!-- Arrows -->
+                        <line x1="110" y1="125" x2="175" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="142" y="118" fill="#64748b" font-size="9" text-anchor="middle">Raw Data</text>
+                        
+                        <line x1="245" y1="125" x2="335" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="290" y="118" fill="#64748b" font-size="9" text-anchor="middle">Clean DF</text>
+                        
+                        <line x1="405" y1="125" x2="495" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="450" y="118" fill="#64748b" font-size="9" text-anchor="middle">Scaled Arr</text>
+                        
+                        <line x1="565" y1="125" x2="740" y2="125" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="650" y="118" fill="#64748b" font-size="9" text-anchor="middle">Log Model Metrics</text>
+
+                        <!-- DFD User to prediction flow -->
+                        <path d="M 60 100 L 60 25 L 348 25" fill="none" stroke="#0ea5e9" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="110" y="18" fill="#0ea5e9" font-size="9">Inference inputs</text>
+                        
+                        <path d="M 370 47 L 370 90" fill="none" stroke="#0ea5e9" stroke-width="1.5" />
+                        <line x1="370" y1="90" x2="280" y2="90" stroke="#0ea5e9" stroke-width="1.5" />
+                        <path d="M 280 90 L 280 200 L 60 200 L 60 150" fill="none" stroke="#0ea5e9" stroke-width="1.5" marker-end="url(#arrow)" />
+                        <text x="170" y="193" fill="#0ea5e9" font-size="9" text-anchor="middle">Churn Prob Result</text>
+                    </svg>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Core Script -->
+    <script src="/static/js/script.js"></script>
+
+</body>
+</html>

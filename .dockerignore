@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.git
+.github
+.venv
+venv
+mlruns
+notebooks
+tests
+*.md
+.env

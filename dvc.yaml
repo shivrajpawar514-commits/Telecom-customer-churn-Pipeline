@@ -1,0 +1,53 @@
+stages:
+  data_ingestion:
+    cmd: python -m src.components.data_ingestion
+    deps:
+      - src/components/data_ingestion.py
+      - src/constants.py
+    outs:
+      - artifacts/train.csv
+      - artifacts/test.csv
+
+  data_validation:
+    cmd: python -m src.components.data_validation
+    deps:
+      - src/components/data_validation.py
+      - schema/schema.yaml
+      - artifacts/train.csv
+      - artifacts/test.csv
+    outs:
+      - artifacts/validation_report.json
+
+  data_transformation:
+    cmd: python -m src.components.data_transformation
+    deps:
+      - src/components/data_transformation.py
+      - artifacts/validation_report.json
+      - artifacts/train.csv
+      - artifacts/test.csv
+    outs:
+      - artifacts/preprocessor.pkl
+      - artifacts/train.npz
+      - artifacts/test.npz
+
+  model_trainer:
+    cmd: python -m src.components.model_trainer
+    deps:
+      - src/components/model_trainer.py
+      - artifacts/train.npz
+      - artifacts/test.npz
+    outs:
+      - artifacts/model.pkl
+    metrics:
+      - artifacts/model_report.json:
+          cache: false
+
+  model_evaluation:
+    cmd: python -m src.components.model_evaluation
+    deps:
+      - src/components/model_evaluation.py
+      - artifacts/model.pkl
+      - artifacts/test.npz
+    metrics:
+      - artifacts/metrics.json:
+          cache: false
