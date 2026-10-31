@@ -9,3 +9,7 @@ notebooks
 tests
 *.md
 .env
+*.pem
+*.key
+credentials
+.pytest_cache

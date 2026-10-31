@@ -1,3 +1,4 @@
+import os
 import sys
 import pandas as pd
 
@@ -32,6 +33,11 @@ class PredictPipeline:
         self._preprocessor = None
 
     def _load(self):
+        if not os.path.exists(self.model_path):
+            raise FileNotFoundError(f"Trained model not found at {self.model_path}. Run training pipeline first.")
+        if not os.path.exists(self.preprocessor_path):
+            raise FileNotFoundError(f"Preprocessor object not found at {self.preprocessor_path}. Run training pipeline first.")
+
         if self._model is None:
             self._model = load_object(self.model_path)
         if self._preprocessor is None:

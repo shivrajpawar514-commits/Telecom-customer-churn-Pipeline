@@ -104,16 +104,19 @@
   * Compares production data splits against baseline training distributions.
   * Identifies changes in data distributions (data drift) and model target predictions (target drift).
   * Automatically generates diagnostic reports, which can be viewed directly within the web dashboard.
-  * Provides early warnings when distribution shifts suggest a model retraining cycle is needed.
+  * Multi-tier alerting (`NO_DRIFT`, `INFO`, `WARNING`, `CRITICAL`) with strict guardrails: zero automatic redeployments.
+  * Triggers documented human-in-the-loop review SOP accounting for 30-60 day label lag.
 
 ---
 
 ## SLIDE 10: Summary & Key Takeaways
 * **Project Deliverables:**
   * A reproducible ML pipeline orchestrated via DVC and tracked by MLflow.
+  * Cryptographic artifact and dataset versioning, ROC-AUC benchmarking against dual baselines.
+  * Rigorous test suite (32 tests) covering schema changes, imbalance, input validation, and deployment rollback.
   * Containerized FastAPI app with Explainable AI (XAI), What-If recommendation sandbox, and Great Expectations data hygiene assertions.
-  * Automated cloud deployment and monitoring.
+  * Automated cloud deployment and monitoring with deployment rollback safety.
 * **Future Scope:**
-  * Automated retraining loops triggered by drift detection events.
+  * Governed shadow retraining workflows with human-in-the-loop review.
   * Integrating a real-time feature store (e.g. Feast) for feature consistency.
 

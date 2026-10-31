@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Backgroun
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.pipeline.prediction_pipeline import PredictPipeline, CustomData
 from src import constants as C
@@ -38,28 +38,29 @@ predictor = PredictPipeline()
 
 
 class CustomerData(BaseModel):
-    gender: str
-    SeniorCitizen: int
-    Partner: str
-    Dependents: str
-    tenure: int
-    PhoneService: str
-    MultipleLines: str
-    InternetService: str
-    OnlineSecurity: str
-    OnlineBackup: str
-    DeviceProtection: str
-    TechSupport: str
-    StreamingTV: str
-    StreamingMovies: str
-    Contract: str
-    PaperlessBilling: str
-    PaymentMethod: str
-    MonthlyCharges: float
-    TotalCharges: float
+    gender: str = Field(..., description="Customer gender: Male, Female")
+    SeniorCitizen: int = Field(..., ge=0, le=1, description="Whether customer is a senior citizen (0 or 1)")
+    Partner: str = Field(..., description="Whether customer has a partner: Yes, No")
+    Dependents: str = Field(..., description="Whether customer has dependents: Yes, No")
+    tenure: int = Field(..., ge=0, le=120, description="Months customer has stayed with company")
+    PhoneService: str = Field(..., description="Whether customer has phone service: Yes, No")
+    MultipleLines: str = Field(..., description="Multiple lines: Yes, No, No phone service")
+    InternetService: str = Field(..., description="Internet service: DSL, Fiber optic, No")
+    OnlineSecurity: str = Field(..., description="Online security: Yes, No, No internet service")
+    OnlineBackup: str = Field(..., description="Online backup: Yes, No, No internet service")
+    DeviceProtection: str = Field(..., description="Device protection: Yes, No, No internet service")
+    TechSupport: str = Field(..., description="Tech support: Yes, No, No internet service")
+    StreamingTV: str = Field(..., description="Streaming TV: Yes, No, No internet service")
+    StreamingMovies: str = Field(..., description="Streaming movies: Yes, No, No internet service")
+    Contract: str = Field(..., description="Contract term: Month-to-month, One year, Two year")
+    PaperlessBilling: str = Field(..., description="Paperless billing: Yes, No")
+    PaymentMethod: str = Field(..., description="Payment method: Electronic check, Mailed check, Bank transfer, Credit card")
+    MonthlyCharges: float = Field(..., ge=0.0, le=1000.0, description="Monthly charges in USD")
+    TotalCharges: float = Field(..., ge=0.0, description="Total charges to date in USD")
 
 
 class PromoteModelRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}
     model_name: str
 
 
@@ -78,11 +79,18 @@ async def home(request: Request):
     )
 
 
-# Health Check
+# Health Check (validates service liveness and model readiness)
 @app.get("/health")
 def health():
+    model_exists = os.path.exists(C.MODEL_FILE_PATH)
+    prep_exists = os.path.exists(C.PREPROCESSOR_OBJ_PATH)
+    status = "healthy" if (model_exists and prep_exists) else "degraded"
     return {
-        "status": "healthy"
+        "status": status,
+        "service": "telecom-churn-api",
+        "version": "1.5.0",
+        "model_loaded": model_exists,
+        "preprocessor_loaded": prep_exists,
     }
 
 

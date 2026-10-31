@@ -5,6 +5,7 @@ venv/
 .venv/
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/monitoring/.gitkeep
 logs/*
 !logs/.gitkeep
 data/raw/*
@@ -16,3 +17,7 @@ mlflow.db
 *.egg-info/
 .dvc/cache
 .DS_Store
+.pytest_cache/
+*.pem
+*.key
+credentials

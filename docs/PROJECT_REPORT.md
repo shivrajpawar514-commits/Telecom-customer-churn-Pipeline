@@ -13,7 +13,7 @@ This thesis presents **ChurnOps**, a production-grade, end-to-end Machine Learni
 
 Data validation is performed using schema assertions, and features are preprocessed using robust pipeline encodings. Three candidate model families (Logistic Regression, Random Forest, and XGBoost) are evaluated. Hyperparameter optimization is performed via `GridSearchCV` with validation tracking handled by **MLflow**. The champion model (XGBoost) achieves an evaluation ROC-AUC score of **0.8459**. 
 
-For deployment, the inference engine is containerized with **Docker**, served via a **FastAPI** web server, and deployed to **AWS ECS Fargate** behind an Application Load Balancer via an automated **GitHub Actions CI/CD** pipeline. Finally, data drift analysis is automated using **Evidently AI** to compare production data distributions against training baselines, closing the loop of continuous monitoring and proactive model retraining.
+For deployment, the inference engine is containerized with **Docker**, served via a **FastAPI** web server, and deployed to **AWS ECS Fargate** behind an Application Load Balancer via an automated **GitHub Actions CI/CD** pipeline. Finally, data drift analysis is automated using **Evidently AI** to compare production data distributions against training baselines, closing the loop of continuous monitoring, multi-tier alerting, and governed human-in-the-loop audit review.
 
 ---
 
@@ -221,7 +221,7 @@ Using the gain metric from XGBoost, we identified the top 5 factors driving cust
 This project successfully demonstrates an end-to-end MLOps pipeline for predicting customer churn in telecommunications. By replacing static notebooks with structured pipelines (orchestrated by DVC, tracked by MLflow, and audited with Evidently AI), we establish a production-grade system that is reproducible, scalable, and audit-friendly. The resulting web dashboard provides clear visibility into model performance and predictions.
 
 ### 7.2 Future Scope
-1. **Automated Retraining Loop:** Configure a workflow where detected data drift automatically triggers retraining via AWS EventBridge and GitHub Actions.
+1. **Governed Human-in-the-Loop Shadow Retraining:** Configure an automated staging workflow where detected data drift triggers offline shadow training and alert routing to model governance reviewers, strictly avoiding unreviewed auto-deployment due to 30-60 day label maturity lag.
 2. **Feature Store Integration:** Integrate a feature store (e.g., Feast) to manage real-time feature extraction.
 3. **Advanced Global Explainability:** Integrate SHAP (SHapley Additive exPlanations) or LIME package installations directly inside the training pipeline to generate global feature explanation reports across the entire cohort.
 
